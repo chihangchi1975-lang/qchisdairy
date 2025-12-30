@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Retro Puzzle</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(135deg, #ffd6e8, #fcbad3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+}
+
+/* WINDOW */
+.window {
+  background: #ffeaf3;
+  border: 2px solid #000;
+  box-shadow: 8px 8px 0 #a97c9d;
+}
+
+/* TITLE BAR */
+.title-bar {
+  height: 32px;
+  background: linear-gradient(to right, #ff9ecb, #ff6fae);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-weight: bold;
+}
+
+.title-bar-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.title-btn {
+  width: 16px;
+  height: 16px;
+  background: #ffeaf3;
+  border: 1px solid #000;
+}
+
+/* CONTENT */
+.content {
+  padding: 16px;
+  text-align: center;
+}
+
+/* PUZZLE */
+.puzzle {
+  display: grid;
+  grid-template-columns: repeat(4, 120px);
+  grid-template-rows: repeat(4, 120px);
+  gap: 2px;
+  background: #000;
+  margin-bottom: 14px;
+}
+
+.tile {
+  width: 120px;
+  height: 120px;
+  background-size: 480px 480px;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 0 #fff;
+}
+
+.empty {
+  background: #ffd6e8;
+  cursor: default;
+}
+
+/* BUTTON */
+button {
+  font-family: inherit;
+  padding: 8px 20px;
+  background: #ff9ecb;
+  border: 2px solid #000;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff6fae;
+}
+
+.footer {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b3c5c;
+}
+</style>
+</head>
+
+<body>
+
+<div class="window">
+  <div class="title-bar">
+    <span>Map to treasure</span>
+    <div class="title-bar-buttons">
+      <div class="title-btn"></div>
+      <div class="title-btn"></div>
+      <div class="title-btn"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="puzzle" id="puzzle"></div>
+    <button onclick="shuffle()">🔀 Xáo trộn</button>
+    <div class="footer">Solve for a suprise!!</div>
+  </div>
+</div>
+
+<script>
+const size = 4;
+const imageURL = "maps.png";
+const puzzle = document.getElementById("puzzle");
+let tiles = [];
+
+function init() {
+  tiles = [];
+  for (let i = 0; i < size * size; i++) tiles.push(i);
+  tiles[tiles.length - 1] = null;
+  shuffle(); // ⭐ xáo trộn ngay từ đầu
+}
+
+function render() {
+  puzzle.innerHTML = "";
+  tiles.forEach((value, index) => {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    if (value === null) {
+      tile.classList.add("empty");
+    } else {
+      const x = (value % size) * -120;
+      const y = Math.floor(value / size) * -120;
+      tile.style.backgroundImage = `url(${imageURL})`;
+      tile.style.backgroundPosition = `${x}px ${y}px`;
+      tile.onclick = () => move(index);
+    }
+    puzzle.appendChild(tile);
+  });
+}
+
+function move(index) {
+  const empty = tiles.indexOf(null);
+  const r1 = Math.floor(index / size);
+  const c1 = index % size;
+  const r2 = Math.floor(empty / size);
+  const c2 = empty % size;
+
+  if (Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1) {
+    [tiles[index], tiles[empty]] = [tiles[empty], tiles[index]];
+    render();
+    checkWin();
+  }
+}
+
+function shuffle() {
+  for (let i = 0; i < 300; i++) {
+    const empty = tiles.indexOf(null);
+    const moves = [];
+    const r = Math.floor(empty / size);
+    const c = empty % size;
+
+    if (r > 0) moves.push(empty - size);
+    if (r < size - 1) moves.push(empty + size);
+    if (c > 0) moves.push(empty - 1);
+    if (c < size - 1) moves.push(empty + 1);
+
+    const m = moves[Math.floor(Math.random() * moves.length)];
+    [tiles[empty], tiles[m]] = [tiles[m], tiles[empty]];
+  }
+  render();
+}
+
+function checkWin() {
+  for (let i = 0; i < tiles.length - 1; i++) {
+    if (tiles[i] !== i) return;
+  }
+  setTimeout(() => alert("🎉 Xếp xong rồi!"), 200);
+}
+
+init();
+</script>
+
+</body>
+</html>
